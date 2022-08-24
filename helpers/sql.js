@@ -4,7 +4,8 @@ const { BadRequestError } = require("../expressError");
  * version to use in an SQL statement
  * 
  * @param {obj} dataToUpdate 
- * @param {obj} jsToSql 
+ * @param {obj} jsToSql an object relating camelCase columns to snake_case
+ * i.e {firstName: "first_name"}
  * @returns {obj} 
  * {
  *  setCols: a string that is a parameterized statement, 
