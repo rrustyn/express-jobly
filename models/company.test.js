@@ -93,7 +93,7 @@ describe("findAll", function () {
 describe("findFiltered", function () {
 
   test("works: partial name search", async function () {
-    const data = { name: "3" };
+    const data = { nameLike: "3" };
 
     let companies = await Company.findFiltered(data);
 
@@ -108,7 +108,7 @@ describe("findFiltered", function () {
   });
 
   test("works: case insensitive search", async function () {
-    const data = { name: "c" };
+    const data = { nameLike: "c" };
 
     let companies = await Company.findFiltered(data);
 
@@ -139,7 +139,7 @@ describe("findFiltered", function () {
   });
 
   test("works: all terms", async function () {
-    const data = { name: "c", minEmployees: 2, maxEmployees: 2 };
+    const data = { nameLike: "c", minEmployees: 2, maxEmployees: 2 };
 
     let companies = await Company.findFiltered(data);
 

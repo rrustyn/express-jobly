@@ -32,7 +32,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
 /** Create a WHERE statement based on input data 
  * 
- * { name: 'c3', minEmployees: 2, maxEmployees: 5 } =>
+ * { nameLike: 'c3', minEmployees: 2, maxEmployees: 5 } =>
  * {
  * whereStatement: name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3
  * values: ['c3', 2, 5]
@@ -47,7 +47,7 @@ function sqlForFiltered(data) {
   const searchTerms = {
     minEmployees: 'num_employees >=',
     maxEmployees: 'num_employees <=',
-    name: 'name ILIKE'
+    nameLike: 'name ILIKE'
   };
 
   // {min = 2, max = 3} => ['num_employees >= $1', "num_employees <= $2" ]
@@ -55,10 +55,10 @@ function sqlForFiltered(data) {
     return `${searchTerms[key]} $${idx + 1}`;
   });
 
-  if (data.name) {
-    data.name = `%${data.name}%`;
+  if (data.nameLike) {
+    data.nameLike = `%${data.nameLike}%`;
   } 
-  //const data = { name: 'c3', minEmployees: 2, maxEmployees: 5 };
+  
   return {
     whereStatement: whereTerms.join(" AND "),
     values: Object.values(data),
@@ -66,5 +66,3 @@ function sqlForFiltered(data) {
 }
 
 module.exports = { sqlForPartialUpdate, sqlForFiltered };
-
-  // {name: 'bob', maxEmployees: 3, minEmployees: 1}

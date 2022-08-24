@@ -126,7 +126,7 @@ describe("GET /companies", function () {
 
   test("all terms query gets results", async function () {
     const resp = await request(app)
-      .get("/companies?name=c3&minEmployees=3&maxEmployees=4");
+      .get("/companies?nameLike=c3&minEmployees=3&maxEmployees=4");
     expect(resp.statusCode).toEqual(200);
     expect(resp.body).toEqual({
       companies: [
@@ -143,7 +143,7 @@ describe("GET /companies", function () {
   
   test("single term query gets results", async function () {
     const resp = await request(app)
-      .get("/companies?name=c3");
+      .get("/companies?nameLike=c3");
     expect(resp.statusCode).toEqual(200);
     expect(resp.body).toEqual({
       companies: [

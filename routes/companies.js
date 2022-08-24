@@ -11,7 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
-const companyFilterSchema = require("../schemas/companyFilter.json")
+const companyFilterSchema = require("../schemas/companyFilter.json");
 
 const router = new express.Router();
 
@@ -57,7 +57,7 @@ router.get("/", async function (req, res, next) {
   // TODO: conditional to check if req.query
   // TODO: check min and max employees
   let companies;
-  if(!Object.keys(req.query).length) {
+  if (!Object.keys(req.query).length) {
     companies = await Company.findAll();
   } else {
     const search = req.query;
@@ -67,7 +67,7 @@ router.get("/", async function (req, res, next) {
     if (search.maxEmployees) {
       search.maxEmployees = +search.maxEmployees;
     }
-    
+
     const validator = jsonschema.validate(
       search,
       companyFilterSchema,
@@ -81,14 +81,14 @@ router.get("/", async function (req, res, next) {
       if (search.minEmployees > search.maxEmployees) {
         throw new BadRequestError(
           "Max employees can't be less than min employees"
-          )
+        );
       }
     }
-    
+
     companies = await Company.findFiltered(search);
   }
-  
-  
+
+
   return res.json({ companies });
 });
 

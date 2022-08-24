@@ -36,7 +36,7 @@ describe("creates parameterized SQL", function () {
 /** Tests sqlForFiltered function */
 describe("creates parameterized SQL for filtered search", function () {
   test("creates a statement with valid data", function () {
-    const data = { name: 'c3', minEmployees: 2, maxEmployees: 5 };
+    const data = { nameLike: 'c3', minEmployees: 2, maxEmployees: 5 };
 
     const whereStatement = 'name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3';
     const values = ['%c3%', 2, 5];
@@ -45,7 +45,7 @@ describe("creates parameterized SQL for filtered search", function () {
   });
   
   test("creates a statement when only one input", function () {
-    const data = { name: 'c3'};
+    const data = { nameLike: 'c3'};
 
     const whereStatement = 'name ILIKE $1';
     const values = ['%c3%'];
