@@ -30,36 +30,41 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
 
 
-
+/** Create a WHERE statement based on input data 
+ * 
+ * { name: 'c3', minEmployees: 2, maxEmployees: 5 } =>
+ * {
+ * whereStatement: name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3
+ * values: ['c3', 2, 5]
+ * }
+ * 
+ * @param {obj} search terms
+ * @return {obj} SQL parameterized terms
+ */
 function sqlForFiltered(data) {
   const keys = Object.keys(data);
-  // if (keys.length === 0) throw new BadRequestError("No data");
-  let x = { min: 'num_employees >=' };
-  // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
-  const cols = keys.map((colName, idx) => {
-    if (key === 'name') {
-      return `"${jsToSql[colName] || colName}"=$${idx + 1}`;
-    }
-    ,
-  }
 
-  );
+  const searchTerms = {
+    minEmployees: 'num_employees >=',
+    maxEmployees: 'num_employees <=',
+    name: 'name ILIKE'
+  };
 
-const data = { name: 'c3', minEmployees: 2, maxEmployees: 5 };
-return {
-  whereStatement: cols.join(" AND "),
-  values: Object.values(dataToUpdate),
-};
+  // {min = 2, max = 3} => ['num_employees >= $1', "num_employees <= $2" ]
+  const whereTerms = keys.map((key, idx) => {
+    return `${searchTerms[key]} $${idx + 1}`;
+  });
+
+  if (data.name) {
+    data.name = `%${data.name}%`;
+  } 
+  //const data = { name: 'c3', minEmployees: 2, maxEmployees: 5 };
+  return {
+    whereStatement: whereTerms.join(" AND "),
+    values: Object.values(data),
+  };
 }
 
 module.exports = { sqlForPartialUpdate, sqlForFiltered };
 
   // {name: 'bob', maxEmployees: 3, minEmployees: 1}
-/** where based on dynamic input
-  * name ILIKE
-  * min -- num_employees >= min
-  * max -- num_employees <= max
-  *
-  *  WHERE name ILIKE $1 AND num_employees >= $2 AND  num_employees <= $3
-  *
-  */
