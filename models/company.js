@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlForFiltered } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -71,23 +71,9 @@ class Company {
   /** Finds companies by user entered filters
    * - * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    */
-  static async findFiltered(data) {
-    /** where based on dynamic input
-     * name ILIKE
-     * min -- num_employees >= min
-     * max -- num_employees <= max
-     *
-     *  WHERE name ILIKE $1 AND num_employees >= $2 AND  num_employees <= $3
-     *
-     */
+  static async findFiltered(searchTerms) {
 
-    const { setCols, values } = sqlForPartialUpdate(
-      data,
-      {
-        numEmployees: "num_employees",
-        logoUrl: "logo_url",
-      });
-    const data = { name: "3", maxEm: 9 };
+    const { whereStatement , values } = sqlForFiltered(searchTerms)
     const companiesRes = await db.query(
       `SELECT handle,
                   name,
@@ -95,10 +81,10 @@ class Company {
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
              FROM companies
-             WHERE name = $1 AND
-             ORDER BY name`);
+             WHERE ${whereStatement}
+             ORDER BY name`, values);
 
-    //  'name, maxEmployees'
+    return companiesRes.rows;
   }
 
   /** Given a company handle, return data about company.
