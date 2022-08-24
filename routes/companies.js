@@ -52,11 +52,9 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  // req.query object
-  // TODO: schema for req.query
-  // TODO: conditional to check if req.query
-  // TODO: check min and max employees
+  
   let companies;
+  
   if (!Object.keys(req.query).length) {
     companies = await Company.findAll();
   } else {

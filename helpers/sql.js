@@ -29,7 +29,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 }
 
 
-
+//make a static function on the class
 /** Create a WHERE statement based on input data 
  * 
  * { nameLike: 'c3', minEmployees: 2, maxEmployees: 5 } =>
