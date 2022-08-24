@@ -30,39 +30,39 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
 
 
-/** Create a WHERE statement based on input data 
- * 
- * { nameLike: 'c3', minEmployees: 2, maxEmployees: 5 } =>
- * {
- * whereStatement: name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3
- * values: ['c3', 2, 5]
- * }
- * 
- * @param {obj} search terms
- * @return {obj} SQL parameterized terms
- */
-function sqlForFiltered(data) {
-  const keys = Object.keys(data);
+// /** Create a WHERE statement based on input data
+//  *
+//  * { nameLike: 'c3', minEmployees: 2, maxEmployees: 5 } =>
+//  * {
+//  * whereStatement: name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3
+//  * values: ['c3', 2, 5]
+//  * }
+//  *
+//  * @param {obj} search terms
+//  * @return {obj} SQL parameterized terms
+//  */
+// function sqlForFiltered(data) {
+//   const keys = Object.keys(data);
 
-  const searchTerms = {
-    minEmployees: 'num_employees >=',
-    maxEmployees: 'num_employees <=',
-    nameLike: 'name ILIKE'
-  };
+//   const searchTerms = {
+//     minEmployees: 'num_employees >=',
+//     maxEmployees: 'num_employees <=',
+//     nameLike: 'name ILIKE'
+//   };
 
-  // {min = 2, max = 3} => ['num_employees >= $1', "num_employees <= $2" ]
-  const whereTerms = keys.map((key, idx) => {
-    return `${searchTerms[key]} $${idx + 1}`;
-  });
+//   // {min = 2, max = 3} => ['num_employees >= $1', "num_employees <= $2" ]
+//   const whereTerms = keys.map((key, idx) => {
+//     return `${searchTerms[key]} $${idx + 1}`;
+//   });
 
-  if (data.nameLike) {
-    data.nameLike = `%${data.nameLike}%`;
-  } 
-  
-  return {
-    whereStatement: whereTerms.join(" AND "),
-    values: Object.values(data),
-  };
-}
+//   if (data.nameLike) {
+//     data.nameLike = `%${data.nameLike}%`;
+//   }
 
-module.exports = { sqlForPartialUpdate, sqlForFiltered };
+//   return {
+//     whereStatement: whereTerms.join(" AND "),
+//     values: Object.values(data),
+//   };
+// }
+
+module.exports = { sqlForPartialUpdate };

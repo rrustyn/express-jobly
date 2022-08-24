@@ -68,12 +68,14 @@ class Company {
   }
 
 
+
+
   /** Finds companies by user entered filters
    * - * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    */
   static async findFiltered(searchTerms) {
 
-    const { whereStatement , values } = sqlForFiltered(searchTerms)
+    const { whereStatement, values } = Company.sqlForFiltered(searchTerms);
     const companiesRes = await db.query(
       `SELECT handle,
                   name,
@@ -85,6 +87,41 @@ class Company {
              ORDER BY name`, values);
 
     return companiesRes.rows;
+  }
+
+  /** Create a WHERE statement based on input data
+ *
+ * { nameLike: 'c3', minEmployees: 2, maxEmployees: 5 } =>
+ * {
+ * whereStatement: name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3
+ * values: ['c3', 2, 5]
+ * }
+ *
+ * @param {obj} search terms
+ * @return {obj} SQL parameterized terms
+ */
+  static sqlForFiltered(data) {
+    const keys = Object.keys(data);
+
+    const searchTerms = {
+      minEmployees: 'num_employees >=',
+      maxEmployees: 'num_employees <=',
+      nameLike: 'name ILIKE'
+    };
+
+    // {min = 2, max = 3} => ['num_employees >= $1', "num_employees <= $2" ]
+    const whereTerms = keys.map((key, idx) => {
+      return `${searchTerms[key]} $${idx + 1}`;
+    });
+
+    if (data.nameLike) {
+      data.nameLike = `%${data.nameLike}%`;
+    }
+
+    return {
+      whereStatement: whereTerms.join(" AND "),
+      values: Object.values(data),
+    };
   }
 
   /** Given a company handle, return data about company.
