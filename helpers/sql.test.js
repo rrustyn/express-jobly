@@ -1,9 +1,9 @@
 "use strict";
 
-const { sqlForPartialUpdate } = require("./sql");
+const { sqlForPartialUpdate, sqlForFiltered } = require("./sql");
 const { BadRequestError } = require("../expressError");
 
-
+/** Tests sqlForPartialUpdate function */
 describe("creates parameterized SQL", function () {
   test("creates a statement with valid data", function () {
     const data = { firstName: 'Aliya', age: 32 };
@@ -30,4 +30,19 @@ describe("creates parameterized SQL", function () {
     expect(() => { sqlForPartialUpdate(data, {}); })
       .toThrowError(BadRequestError);
   });
+});
+
+
+/** Tests sqlForFiltered function */
+describe("creates parameterized SQL for filtered search", function () {
+  test("creates a statement with valid data", function () {
+    const data = { name: 'c3', minEmployees: 2, maxEmployees: 5 };
+
+    const whereStatement = 'name ILIKE $1 AND num_employees >= $2 AND  num_employees <= $3';
+    const values = ['c3', 2, 5];
+
+    expect(sqlForFiltered(data)).toEqual({ whereStatement, values });
+  });
+
+
 });

@@ -33,27 +33,26 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
 function sqlForFiltered(data) {
   const keys = Object.keys(data);
-  if (keys.length === 0) throw new BadRequestError("No data");
-
+  // if (keys.length === 0) throw new BadRequestError("No data");
+  let x = { min: 'num_employees >=' };
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
-  // const cols = keys.map((colName, idx) => {
-  //   if(colName === 'maxEmployees')
-  //   `"${jsToSql[colName] || colName}"=$${idx + 1}`,
-  // }
-
-  // );
-  let setCols = [];
-  for (let term in data) {
-    if term === 'name'
+  const cols = keys.map((colName, idx) => {
+    if (key === 'name') {
+      return `"${jsToSql[colName] || colName}"=$${idx + 1}`;
+    }
+    ,
   }
 
-  return {
-    setCols: cols.join(" AND "),
-    values: Object.values(dataToUpdate),
-  };
+  );
+
+const data = { name: 'c3', minEmployees: 2, maxEmployees: 5 };
+return {
+  whereStatement: cols.join(" AND "),
+  values: Object.values(dataToUpdate),
+};
 }
 
-module.exports = { sqlForPartialUpdate };
+module.exports = { sqlForPartialUpdate, sqlForFiltered };
 
   // {name: 'bob', maxEmployees: 3, minEmployees: 1}
 /** where based on dynamic input
