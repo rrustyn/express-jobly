@@ -49,15 +49,16 @@ class Company {
     return company;
   }
 
-  /** Find all companies.
-   *
+  /** Find companies, if no filters are included it will show all companies
+   * if a filter object id provided { nameLike: 'c3', minEmployees: 2, maxEmployees: 5 }
+   *  the results will be filtered
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
   static async findAll(searchTerms = {}) {
-
+    let companiesRes;
     if (!Object.keys(searchTerms).length) {
-      const companiesRes = await db.query(
+      companiesRes = await db.query(
         `SELECT handle,
                   name,
                   description,
@@ -65,11 +66,11 @@ class Company {
                   logo_url AS "logoUrl"
              FROM companies
              ORDER BY name`);
-      return companiesRes.rows;
+
     }
     else {
       const { whereStatement, values } = Company.sqlForFiltered(searchTerms);
-      const companiesRes = await db.query(
+      companiesRes = await db.query(
         `SELECT handle,
                     name,
                     description,
@@ -79,9 +80,9 @@ class Company {
                WHERE ${whereStatement}
                ORDER BY name`, values);
 
-      return companiesRes.rows;
-    }
 
+    }
+    return companiesRes.rows;
   }
 
 
