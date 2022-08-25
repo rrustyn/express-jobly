@@ -177,11 +177,14 @@ describe("GET /users", function () {
     });
   });
 
+
   test("unauth for anon", async function () {
     const resp = await request(app)
       .get("/users");
     expect(resp.statusCode).toEqual(401);
   });
+
+
 
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
@@ -213,6 +216,39 @@ describe("GET /users/:username", function () {
     });
   });
 
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .get("/users/u1")
+      .set("authorization", `Bearer ${a1Token}`);
+    expect(resp.body).toEqual({
+      user:
+      {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+
+    });
+  });
+
+
+
+  test("Forbidden for non-admin", async function () {
+    const resp = await request(app)
+      .get("/users/u2")
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(403);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Forbidden",
+        "status": 403
+      }
+    });
+  });
+
+
   test("unauth for anon", async function () {
     const resp = await request(app)
       .get(`/users/u1`);
@@ -230,6 +266,7 @@ describe("GET /users/:username", function () {
 /************************************** PATCH /users/:username */
 
 describe("PATCH /users/:username", () => {
+
   test("works for users", async function () {
     const resp = await request(app)
       .patch(`/users/u1`)
@@ -245,6 +282,38 @@ describe("PATCH /users/:username", () => {
         email: "user1@user.com",
         isAdmin: false,
       },
+    });
+  });
+
+
+
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .get("/users/u1")
+      .set("authorization", `Bearer ${a1Token}`);
+    expect(resp.body).toEqual({
+      user:
+      {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+
+    });
+  });
+
+  test("Forbidden for non-admin", async function () {
+    const resp = await request(app)
+      .patch("/users/u2")
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(403);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Forbidden",
+        "status": 403
+      }
     });
   });
 
@@ -300,12 +369,36 @@ describe("PATCH /users/:username", () => {
 
 /************************************** DELETE /users/:username */
 
+
 describe("DELETE /users/:username", function () {
   test("works for users", async function () {
     const resp = await request(app)
       .delete(`/users/u1`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({ deleted: "u1" });
+  });
+
+
+
+
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .delete("/users/u1")
+      .set("authorization", `Bearer ${a1Token}`);
+    expect(resp.body).toEqual({ deleted: "u1" });
+  });
+
+  test("Forbidden for non-admin", async function () {
+    const resp = await request(app)
+      .delete("/users/u2")
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(403);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Forbidden",
+        "status": 403
+      }
+    });
   });
 
   test("unauth for anon", async function () {
