@@ -61,7 +61,6 @@ describe("create", function () {
 /************************************** findAll */
 
 describe("findAll", function () {
-  // TODO:put in other companies with longer names
   test("works: no filter", async function () {
 
     let companies = await Company.findAll();
