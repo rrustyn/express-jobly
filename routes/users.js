@@ -63,10 +63,11 @@ router.get("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, isAdmin }
  *
- * Authorization required: logged in as user or admin
+ * Authorization required: logged in as current user or admin
  **/
 
 router.get("/:username", ensureLoggedIn, async function (req, res, next) {
+  // TODO: use middleware
   if (res.locals.user.username !== req.params.username
     && res.locals.user.isAdmin !== true) {
     throw new ForbiddenError();
@@ -85,7 +86,7 @@ router.get("/:username", ensureLoggedIn, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
- * Authorization required: logged in as user or admin
+ * Authorization required: logged in as current user or admin
  **/
 
 
@@ -113,7 +114,7 @@ router.patch("/:username", ensureLoggedIn, async function (req, res, next) {
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: logged in as user or admin
+ * Authorization required: logged in as current user or admin
  **/
 // TODO :admin OR that user
 router.delete("/:username", ensureLoggedIn, async function (req, res, next) {

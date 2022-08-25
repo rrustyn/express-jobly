@@ -82,7 +82,8 @@ describe("ensureLoggedIn", function () {
 
 describe("ensureIsAdmin", function () {
   test("works", function () {
-    //TODO: assertions?
+
+    // mocking
     expect.assertions(1);
     const req = {};
     const res = { locals: { user: { isAdmin: true } } };
@@ -95,9 +96,9 @@ describe("ensureIsAdmin", function () {
   test("unauth if not admin", function () {
     expect.assertions(1);
     const req = {};
-    const res = { locals: { user: { isAdmin: false}} };
+    const res = { locals: { user: { isAdmin: false } } };
     const next = function (err) {
-      expect(err instanceof ForbiddenError).toBeTruthy();
+      expect(err instanceof UnauthorizedError).toBeTruthy();
     };
     ensureIsAdmin(req, res, next);
   });
