@@ -45,7 +45,7 @@ function ensureLoggedIn(req, res, next) {
 
 /** Middleware to use to check if user is admin.
  *
- * If not, raises Unauthorized.
+ * If not, raises Forbidden.
  */
 function ensureIsAdmin(req, res, next) {
 
