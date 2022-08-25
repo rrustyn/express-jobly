@@ -107,15 +107,20 @@ describe("GET /companies", function () {
     expect(resp.statusCode).toEqual(500);
   });
 
-  //test validation
-  //min employee > max send 400
-  //
-  //test correct function runs
-  //
+
   test("bad schema throw error", async function () {
     const resp = await request(app)
       .get("/companies?garbage=garbage");
+
     expect(resp.statusCode).toEqual(400);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": [
+          "instance is not allowed to have the additional property \"garbage\""
+        ],
+        "status": 400
+      }
+    });
   });
 
   test("min > max throw error", async function () {
@@ -140,7 +145,21 @@ describe("GET /companies", function () {
       ]
     });
   });
-  
+
+  test("min or max NaN", async function () {
+    const resp = await request(app)
+      .get("/companies?nameLike=c3&maxEmployees=red");
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": [
+          "instance.maxEmployees is not of a type(s) integer"
+        ],
+        "status": 400
+      }
+    });
+  });
+
   test("single term query gets results", async function () {
     const resp = await request(app)
       .get("/companies?nameLike=c3");

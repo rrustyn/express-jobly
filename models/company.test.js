@@ -1,5 +1,7 @@
 "use strict";
 
+/**MODELS TEST */
+
 const db = require("../db.js");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const Company = require("./company.js");
@@ -118,7 +120,7 @@ describe("findFiltered", function () {
   test("works: partial name search", async function () {
     const data = { nameLike: "3" };
 
-    let companies = await Company.findFiltered(data);
+    let companies = await Company.findAll(data);
 
     expect(companies).toEqual([{
       handle: "c3",
@@ -133,7 +135,7 @@ describe("findFiltered", function () {
   test("works: case insensitive search", async function () {
     const data = { nameLike: "c" };
 
-    let companies = await Company.findFiltered(data);
+    let companies = await Company.findAll(data);
 
     expect(companies).toEqual([
       {
@@ -164,7 +166,7 @@ describe("findFiltered", function () {
   test("works: all terms", async function () {
     const data = { nameLike: "c", minEmployees: 2, maxEmployees: 2 };
 
-    let companies = await Company.findFiltered(data);
+    let companies = await Company.findAll(data);
 
     expect(companies).toEqual(
       [{
@@ -180,7 +182,7 @@ describe("findFiltered", function () {
   test("works: no results", async function () {
     const data = { minEmployees: 20 };
 
-    let companies = await Company.findFiltered(data);
+    let companies = await Company.findAll(data);
 
     expect(companies).toEqual([]);
 
@@ -189,7 +191,7 @@ describe("findFiltered", function () {
   test("works: max employees", async function () {
     const data = { maxEmployees: 2 };
 
-    let companies = await Company.findFiltered(data);
+    let companies = await Company.findAll(data);
 
     expect(companies).toEqual([{
       handle: "c1",

@@ -54,40 +54,36 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
-    //TODO: sqlForPartialUpdate for where clause??
-    const companiesRes = await db.query(
-      `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`);
-    return companiesRes.rows;
-  }
+  static async findAll(searchTerms = {}) {
 
-
-
-
-  /** Finds companies by user entered filters
-   * - * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
-   */
-  static async findFiltered(searchTerms) {
-
-    const { whereStatement, values } = Company.sqlForFiltered(searchTerms);
-    const companiesRes = await db.query(
-      `SELECT handle,
+    if (!Object.keys(searchTerms).length) {
+      const companiesRes = await db.query(
+        `SELECT handle,
                   name,
                   description,
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
              FROM companies
-             WHERE ${whereStatement}
-             ORDER BY name`, values);
+             ORDER BY name`);
+      return companiesRes.rows;
+    }
+    else {
+      const { whereStatement, values } = Company.sqlForFiltered(searchTerms);
+      const companiesRes = await db.query(
+        `SELECT handle,
+                    name,
+                    description,
+                    num_employees AS "numEmployees",
+                    logo_url AS "logoUrl"
+               FROM companies
+               WHERE ${whereStatement}
+               ORDER BY name`, values);
 
-    return companiesRes.rows;
+      return companiesRes.rows;
+    }
+
   }
+
 
   /** Create a WHERE statement based on input data
  *
