@@ -14,11 +14,11 @@ const adminJwt = jwt.sign({ username: "admin", isAdmin: true }, SECRET_KEY);
 const badJwt = jwt.sign({ username: "test", isAdmin: false }, "wrong");
 
 describe("ensureIsAdmin and current user", function () {
-  test("isAdmin can change", function () {
+  test("isAdmin no error", function () {
 
     // mocking
     expect.assertions(1);
-    const req = {};
+    const req = { params: { username: 'u1' } };
     const res = { locals: { user: { isAdmin: true } } };
     const next = function (err) {
       expect(err).toBeFalsy();
@@ -26,7 +26,7 @@ describe("ensureIsAdmin and current user", function () {
     ensureIsAdminOrCurrentUser(req, res, next);
   });
 
-  test("is current user but not admin", function () {
+  test("current user no error", function () {
     expect.assertions(1);
     const req = { params: { username: 'u1' } };
     const res = { locals: { user: { username: "u1" } } };
@@ -37,7 +37,7 @@ describe("ensureIsAdmin and current user", function () {
   });
 
 
-  test("is not admin or current user can't change", function () {
+  test("not admin or user unauth", function () {
     expect.assertions(1);
     const req = { params: { username: 'u1' } };
     const res = { locals: { user: { username: "u2" } } };

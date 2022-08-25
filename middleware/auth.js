@@ -45,21 +45,21 @@ function ensureLoggedIn(req, res, next) {
 
 
 
-/** Middleware to use to check if user is admin.
+/** Middleware to use to check if user is logged in and a admin.
  *
- * If not, raises Forbidden.
+ * If not, raises Unauthorized.
  */
 
 function ensureIsAdmin(req, res, next) {
   try {
-    if (!res.locals.user.isAdmin || !res.locals.user) {
+    if (!res.locals.user || !res.locals.user.isAdmin) {
       throw new UnauthorizedError();
     }
+    return next();
   }
   catch (err) {
     return next(err);
   }
-  return next();
 }
 
 

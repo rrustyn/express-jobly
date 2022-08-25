@@ -6,7 +6,8 @@ const jsonschema = require("jsonschema");
 
 const express = require("express");
 const { ensureLoggedIn, ensureIsAdmin } = require("../middleware/auth");
-const { BadRequestError, ForbiddenError } = require("../expressError");
+const { ensureIsAdminOrCurrentUser } = require("../middleware/user");
+const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
@@ -28,7 +29,7 @@ const router = express.Router();
  **/
 
 
-router.post("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
+router.post("/", ensureIsAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(
     req.body,
     userNewSchema,
@@ -53,7 +54,7 @@ router.post("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) 
  **/
 
 
-router.get("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
+router.get("/", ensureIsAdmin, async function (req, res, next) {
   const users = await User.findAll();
   return res.json({ users });
 });
@@ -66,17 +67,11 @@ router.get("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
  * Authorization required: logged in as current user or admin
  **/
 
-router.get("/:username", ensureLoggedIn, async function (req, res, next) {
-  // TODO: use middleware
-  if (res.locals.user.username !== req.params.username
-    && res.locals.user.isAdmin !== true) {
-    throw new ForbiddenError();
-  }
-
-  const user = await User.get(req.params.username);
-
-  return res.json({ user });
-});
+router.get("/:username", ensureIsAdminOrCurrentUser,
+  async function (req, res, next) {
+    const user = await User.get(req.params.username);
+    return res.json({ user });
+  });
 
 
 /** PATCH /[username] { user } => { user }
@@ -90,41 +85,33 @@ router.get("/:username", ensureLoggedIn, async function (req, res, next) {
  **/
 
 
-router.patch("/:username", ensureLoggedIn, async function (req, res, next) {
+router.patch("/:username", ensureIsAdminOrCurrentUser,
+  async function (req, res, next) {
 
-  if (res.locals.user.username !== req.params.username
-    && res.locals.user.isAdmin !== true) {
-    throw new ForbiddenError();
-  }
+    const validator = jsonschema.validate(
+      req.body,
+      userUpdateSchema,
+      { required: true }
+    );
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
 
-  const validator = jsonschema.validate(
-    req.body,
-    userUpdateSchema,
-    { required: true }
-  );
-  if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
-    throw new BadRequestError(errs);
-  }
-
-  const user = await User.update(req.params.username, req.body);
-  return res.json({ user });
-});
+    const user = await User.update(req.params.username, req.body);
+    return res.json({ user });
+  });
 
 
 /** DELETE /[username]  =>  { deleted: username }
  *
  * Authorization required: logged in as current user or admin
  **/
-// TODO :admin OR that user
-router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
-  if (res.locals.user.username !== req.params.username
-    && res.locals.user.isAdmin !== true) {
-    throw new ForbiddenError();
-  }
-  await User.remove(req.params.username);
-  return res.json({ deleted: req.params.username });
-});
+router.delete("/:username", ensureIsAdminOrCurrentUser,
+  async function (req, res, next) {
+    await User.remove(req.params.username);
+    return res.json({ deleted: req.params.username });
+  });
 
 
 module.exports = router;

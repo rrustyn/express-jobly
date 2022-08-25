@@ -69,7 +69,7 @@ describe("POST /users", function () {
       }, token: expect.any(String),
     });
   });
-  test("forbidden for non-admin", async function () {
+  test("Unauthorized for non-admin", async function () {
     const resp = await request(app)
       .post("/users")
       .send({
@@ -81,11 +81,11 @@ describe("POST /users", function () {
         isAdmin: true,
       })
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(403);
+    expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
       "error": {
-        "message": "Forbidden",
-        "status": 403
+        "message": "Unauthorized",
+        "status": 401
       }
     });
   });
@@ -164,15 +164,15 @@ describe("GET /users", function () {
     });
   });
 
-  test("Forbidden for non-admin", async function () {
+  test("Unauthorized for non-admin", async function () {
     const resp = await request(app)
       .get("/users")
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(403);
+    expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
       "error": {
-        "message": "Forbidden",
-        "status": 403
+        "message": "Unauthorized",
+        "status": 401
       }
     });
   });
@@ -235,15 +235,15 @@ describe("GET /users/:username", function () {
 
 
 
-  test("Forbidden for non-admin", async function () {
+  test("Unauthorized for non-admin", async function () {
     const resp = await request(app)
       .get("/users/u2")
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(403);
+    expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
       "error": {
-        "message": "Forbidden",
-        "status": 403
+        "message": "Unauthorized",
+        "status": 401
       }
     });
   });
@@ -304,15 +304,15 @@ describe("PATCH /users/:username", () => {
     });
   });
 
-  test("Forbidden for non-admin", async function () {
+  test("Unauthorized for non-admin", async function () {
     const resp = await request(app)
       .patch("/users/u2")
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(403);
+    expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
       "error": {
-        "message": "Forbidden",
-        "status": 403
+        "message": "Unauthorized",
+        "status": 401
       }
     });
   });
@@ -388,15 +388,15 @@ describe("DELETE /users/:username", function () {
     expect(resp.body).toEqual({ deleted: "u1" });
   });
 
-  test("Forbidden for non-admin", async function () {
+  test("Unauthorized for non-admin", async function () {
     const resp = await request(app)
       .delete("/users/u2")
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(403);
+    expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
       "error": {
-        "message": "Forbidden",
-        "status": 403
+        "message": "Unauthorized",
+        "status": 401
       }
     });
   });
