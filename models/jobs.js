@@ -52,25 +52,25 @@ class Job {
     if (!Object.keys(searchTerms).length) {
       jobResults = await db.query(
         `SELECT id,
-                    title,
-                    salary,
-                    equity,
-                    company_handle AS "companyHandle"
-               FROM jobs
-               ORDER BY title`);
+                title,
+                salary,
+                equity,
+                company_handle AS "companyHandle"
+            FROM jobs
+            ORDER BY title`);
     }
-    // else {
-    //   const { whereStatement, values } = Job.sqlForFiltered(searchTerms);
-    //   jobResults = await db.query(
-    //     `SELECT id,
-    //                   title,
-    //                   salary,
-    //                   equity,
-    //                   company_handle AS "companyHandle"
-    //              FROM companies
-    //              WHERE ${whereStatement}
-    //              ORDER BY name`, values);
-    // }
+    else {
+      const { whereStatement, values } = Job.sqlForFiltered(searchTerms);
+      jobResults = await db.query(
+        `SELECT id,
+                title,
+                salary,
+                equity,
+                company_handle AS "companyHandle"
+            FROM jobs
+            WHERE ${whereStatement}
+            ORDER BY title`, values);
+    }
     return jobResults.rows;
   }
 
@@ -78,7 +78,7 @@ class Job {
  *
  * {title, minSalary, hasEquity } =>
  * whereStatement: title ILIKE $1 AND minSalary >= $2 AND equity > 0
- * values: ['j1', 1000000, 0.004]
+ * values: ['j1', 1000000]
  *
  * }
  *
@@ -89,27 +89,25 @@ class Job {
     const keys = Object.keys(data);
     let whereTerms = [];
     let values = [];
+    let counter = 1;
     // loop data
-
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      if (key === 'title') {
-        whereTerms.push(`title ILIKE $${i + 1}`);
-        values.push(`%${data[key]}%`);
-      }
-      if (key === 'minSalary') {
-        whereTerms.push(`salary >= $${i + 1}`);
-        values.push(data[key]);
-      }
-      if (key === 'hasEquity' && data[key] === true) {
-        whereTerms.push(`equity > 0`);
-      }
-
+    if ('title' in data) {
+      whereTerms.push(`title ILIKE $${counter}`);
+      values.push(`%${data.title}%`);
+      counter++;
+    }
+    if ('minSalary' in data) {
+      whereTerms.push(`salary >= $${counter}`);
+      values.push(data.minSalary);
+      counter++;
+    }
+    if ('hasEquity' in data && data.hasEquity === true) {
+      whereTerms.push(`equity > 0`);
     }
 
     return {
       whereStatement: whereTerms.join(" AND "),
-      values: Object.values(data),
+      values: values,
     };
   }
 

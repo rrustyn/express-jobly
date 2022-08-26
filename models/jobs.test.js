@@ -109,7 +109,7 @@ describe("creates parameterized SQL for filtered search", function () {
     const data = { title: 'j1', minSalary: 500000, hasEquity: true };
 
     const whereStatement = 'title ILIKE $1 AND salary >= $2 AND equity > 0';
-    const values = ['j1', 1000000];
+    const values = ['%j1%', 500000];
 
     expect(Job.sqlForFiltered(data)).toEqual({ whereStatement, values });
   });
@@ -128,7 +128,7 @@ describe("creates parameterized SQL for filtered search", function () {
 
     const data = { title: 'j1', minSalary: 500000 };
     const whereStatement = 'title ILIKE $1 AND salary >= $2';
-    const values = ['j1', 500000];
+    const values = ['%j1%', 500000];
 
     expect(Job.sqlForFiltered(data)).toEqual({ whereStatement, values });
   });
@@ -137,8 +137,8 @@ describe("creates parameterized SQL for filtered search", function () {
 
     const data = { title: 'j1', minSalary: 500000, hasEquity: false };
     const whereStatement = 'title ILIKE $1 AND salary >= $2';
-    const values = ['j1', 500000];
-
+    const values = ['%j1%', 500000];
+    
     expect(Job.sqlForFiltered(data)).toEqual({ whereStatement, values });
   });
 
@@ -148,98 +148,77 @@ describe("creates parameterized SQL for filtered search", function () {
 /**************************************  findFiltered */
 describe("findFiltered", function () {
 
-  // test("works: partial name search", async function () {
-  //   const data = { nameLike: "3" };
+  test("works: partial name search", async function () {
+    const data = { title: "j1" };
 
-  //   let companies = await Company.findAll(data);
+    let jobs = await Job.findAll(data);
 
-  //   expect(companies).toEqual([{
-  //     handle: "c3",
-  //     name: "C3",
-  //     description: "Desc3",
-  //     numEmployees: 3,
-  //     logoUrl: "http://c3.img",
-  //   }]);
+    expect(jobs).toEqual([{
+      id: jobIds[0],
+      title: 'j1',
+      salary: 1000000,
+      equity: '0.004',
+      companyHandle: 'c1'
+    }]);
 
-  // });
+  });
 
-  // test("works: case insensitive search", async function () {
-  //   const data = { nameLike: "c" };
+  test("works: case insensitive search", async function () {
+    const data = { title: "J" };
 
-  //   let companies = await Company.findAll(data);
+    let jobs = await Job.findAll(data);
 
-  //   expect(companies).toEqual([
-  //     {
-  //       handle: "c1",
-  //       name: "C1",
-  //       description: "Desc1",
-  //       numEmployees: 1,
-  //       logoUrl: "http://c1.img",
-  //     },
-  //     {
-  //       handle: "c2",
-  //       name: "C2",
-  //       description: "Desc2",
-  //       numEmployees: 2,
-  //       logoUrl: "http://c2.img",
-  //     },
-  //     {
-  //       handle: "c3",
-  //       name: "C3",
-  //       description: "Desc3",
-  //       numEmployees: 3,
-  //       logoUrl: "http://c3.img",
-  //     },
-  //   ]);
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: 'j1',
+        salary: 1000000,
+        equity: '0.004',
+        companyHandle: 'c1'
+      },
+      {
+        id: expect.any(Number),
+        title: 'j2',
+        salary: 2000000,
+        equity: '0.004',
+        companyHandle: 'c2'
+      },
+      {
+        id: expect.any(Number),
+        title: 'j3',
+        salary: 3000000,
+        equity: '0.004',
+        companyHandle: 'c1'
+      },
+    ]);
 
-  // });
+  });
 
-  // test("works: all terms", async function () {
-  //   const data = { nameLike: "c", minEmployees: 2, maxEmployees: 2 };
+  test("works: all terms", async function () {
+    const data = { title: "j", minSalary: 2500000, hasEquity: true };
 
-  //   let companies = await Company.findAll(data);
+    let job = await Job.findAll(data);
 
-  //   expect(companies).toEqual(
-  //     [{
-  //       handle: "c2",
-  //       name: "C2",
-  //       description: "Desc2",
-  //       numEmployees: 2,
-  //       logoUrl: "http://c2.img",
-  //     }]);
+    expect(job).toEqual(
+      [{
+        id: expect.any(Number),
+        title: 'j3',
+        salary: 3000000,
+        equity: '0.004',
+        companyHandle: 'c1'
+      }]);
 
-  // });
+  });
 
-  // test("works: no results", async function () {
-  //   const data = { minEmployees: 20 };
+  test("works: no results", async function () {
+    const data = { minSalary: 5000000 };
 
-  //   let companies = await Company.findAll(data);
+    let jobs = await Job.findAll(data);
 
-  //   expect(companies).toEqual([]);
+    expect(jobs).toEqual([]);
 
-  // });
+  });
 
-  // test("works: max employees", async function () {
-  //   const data = { maxEmployees: 2 };
-
-  //   let companies = await Company.findAll(data);
-
-  //   expect(companies).toEqual([{
-  //     handle: "c1",
-  //     name: "C1",
-  //     description: "Desc1",
-  //     numEmployees: 1,
-  //     logoUrl: "http://c1.img",
-  //   },
-  //   {
-  //     handle: "c2",
-  //     name: "C2",
-  //     description: "Desc2",
-  //     numEmployees: 2,
-  //     logoUrl: "http://c2.img",
-  //   }]);
-
-  // });
 });
 
 /************************************** get */
