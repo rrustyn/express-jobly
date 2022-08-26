@@ -59,27 +59,27 @@ class Job {
                FROM jobs
                ORDER BY title`);
     }
-    else {
-      const { whereStatement, values } = Job.sqlForFiltered(searchTerms);
-      jobResults = await db.query(
-        `SELECT id,
-                      title,
-                      salary,
-                      equity,
-                      company_handle AS "companyHandle"
-                 FROM companies
-                 WHERE ${whereStatement}
-                 ORDER BY name`, values);
-    }
+    // else {
+    //   const { whereStatement, values } = Job.sqlForFiltered(searchTerms);
+    //   jobResults = await db.query(
+    //     `SELECT id,
+    //                   title,
+    //                   salary,
+    //                   equity,
+    //                   company_handle AS "companyHandle"
+    //              FROM companies
+    //              WHERE ${whereStatement}
+    //              ORDER BY name`, values);
+    // }
     return jobResults.rows;
   }
 
   /** Create a WHERE statement based on input data
  *
- * {title, minSalary, minEquity, companyHandle } =>
- * {
- * whereStatement: title ILIKE $1 AND num_employees >= $2 AND num_employees <= $3
- * values: ['c3', 2, 5]
+ * {title, minSalary, hasEquity } =>
+ * whereStatement: title ILIKE $1 AND minSalary >= $2 AND equity > 0
+ * values: ['j1', 1000000, 0.004]
+ *
  * }
  *
  * @param {obj} search terms
@@ -87,20 +87,24 @@ class Job {
  */
   static sqlForFiltered(data) {
     const keys = Object.keys(data);
+    let whereTerms = [];
+    let values = [];
+    // loop data
 
-    const searchTerms = {
-      minSalary: 'salary >=',
-      minEquity: 'equity >=',
-      title: 'title ILIKE'
-    };
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (key === 'title') {
+        whereTerms.push(`title ILIKE $${i + 1}`);
+        values.push(`%${data[key]}%`);
+      }
+      if (key === 'minSalary') {
+        whereTerms.push(`salary >= $${i + 1}`);
+        values.push(data[key]);
+      }
+      if (key === 'hasEquity' && data[key] === true) {
+        whereTerms.push(`equity > 0`);
+      }
 
-    // {min = 2, max = 3} => ['num_employees >= $1', "num_employees <= $2" ]
-    const whereTerms = keys.map((key, idx) => {
-      return `${searchTerms[key]} $${idx + 1}`;
-    });
-
-    if (data.title) {
-      data.title = `%${data.title}%`;
     }
 
     return {
@@ -126,29 +130,49 @@ class Job {
 
     return job;
   }
-  
+  /** updates {title, salary, equity}
+   * => {id, title, salary, equity, company_handle }*/
   static async update(id, data) {
     const { setCols, values } = sqlForPartialUpdate(
       data,
-      {
-        numEmployees: "num_employees",
-        logoUrl: "logo_url",
-      });
-    const handleVarIdx = "$" + (values.length + 1);
+      {});
+    const idVarIndex = "$" + (values.length + 1);
 
     const querySql = `
-      UPDATE companies
+      UPDATE jobs
       SET ${setCols}
-        WHERE handle = ${handleVarIdx}
-        RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`;
-    const result = await db.query(querySql, [...values, handle]);
-    const company = result.rows[0];
+        WHERE id = ${idVarIndex}
+        RETURNING id, title, salary, equity, company_handle AS "companyHandle"`;
+    const result = await db.query(querySql, [...values, id]);
+    const job = result.rows[0];
 
-    if (!company) throw new NotFoundError(`No company: ${handle}`);
+    if (!job) throw new NotFoundError(`No job for id: ${id}`);
 
-    return company;
+    return job;
   }
-};
+
+
+  /** Delete given job from database; returns undefined.
+   *
+   * Throws NotFoundError if company not found.
+   **/
+
+  static async remove(id) {
+    const result = await db.query(
+      `DELETE
+           FROM jobs
+           WHERE id = $1
+           RETURNING id`,
+      [id]);
+    const job = result.rows[0];
+
+    if (!job) throw new NotFoundError(`No job: ${id}`);
+  }
+}
+
+
+
+
 
 
 module.exports = Job;
