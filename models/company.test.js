@@ -214,13 +214,20 @@ describe("findFiltered", function () {
 
 describe("get", function () {
   test("works", async function () {
-    let company = await Company.get("c1");
+    let company = await Company.get("c2");
     expect(company).toEqual({
-      handle: "c1",
-      name: "C1",
-      description: "Desc1",
-      numEmployees: 1,
-      logoUrl: "http://c1.img",
+      handle: "c2",
+      name: "C2",
+      description: "Desc2",
+      numEmployees: 2,
+      logoUrl: "http://c2.img",
+      jobs: [{
+        id: expect.any(Number),
+        title: 'j2',
+        salary: 2000000,
+        equity: '0.004',
+        companyHandle: 'c2'
+      }]
     });
   });
 

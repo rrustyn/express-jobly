@@ -138,7 +138,7 @@ describe("creates parameterized SQL for filtered search", function () {
     const data = { title: 'j1', minSalary: 500000, hasEquity: false };
     const whereStatement = 'title ILIKE $1 AND salary >= $2';
     const values = ['%j1%', 500000];
-    
+
     expect(Job.sqlForFiltered(data)).toEqual({ whereStatement, values });
   });
 
