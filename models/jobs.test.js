@@ -1,8 +1,6 @@
 "use strict";
 
-"use strict";
-
-/**MODELS TEST */
+/**JOB MODELS TEST */
 
 const db = require("../db.js");
 const { BadRequestError, NotFoundError } = require("../expressError");
@@ -13,6 +11,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  jobIds
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -224,25 +223,26 @@ describe("findFiltered", function () {
 /************************************** get */
 
 describe("get", function () {
-  // test("works", async function () {
-  //   let company = await Company.get("c1");
-  //   expect(company).toEqual({
-  //     handle: "c1",
-  //     name: "C1",
-  //     description: "Desc1",
-  //     numEmployees: 1,
-  //     logoUrl: "http://c1.img",
-  //   });
-  // });
 
-  // test("not found if no such company", async function () {
-  //   try {
-  //     await Company.get("nope");
-  //     throw new Error("fail test, you shouldn't get here");
-  //   } catch (err) {
-  //     expect(err instanceof NotFoundError).toBeTruthy();
-  //   }
-  // });
+  test("works", async function () {
+    let job = await Job.get(jobIds[0]);
+    expect(job).toEqual({
+        id: jobIds[0],
+        title: 'j1',
+        salary: 1000000,
+        equity: '0.004',
+        companyHandle: 'c1'
+    });
+  });
+
+  test("not found if no such job", async function () {
+    try {
+      await Job.get(0);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
 });
 
 /************************************** update */

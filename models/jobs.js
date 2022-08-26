@@ -58,9 +58,6 @@ class Job {
                     company_handle AS "companyHandle"
                FROM jobs
                ORDER BY title`);
-
-
-
     }
     else {
       const { whereStatement, values } = Job.sqlForFiltered(searchTerms);
@@ -73,8 +70,6 @@ class Job {
                  FROM companies
                  WHERE ${whereStatement}
                  ORDER BY name`, values);
-
-
     }
     return jobResults.rows;
   }
@@ -96,7 +91,6 @@ class Job {
     const searchTerms = {
       minSalary: 'salary >=',
       minEquity: 'equity >=',
-      companyHandle: 'company_handle ILIKE',
       title: 'title ILIKE'
     };
 
@@ -105,9 +99,6 @@ class Job {
       return `${searchTerms[key]} $${idx + 1}`;
     });
 
-    if (data.companyHandle) {
-      data.companyHandle = `%${data.companyHandle}%`;
-    }
     if (data.title) {
       data.title = `%${data.title}%`;
     }
@@ -118,7 +109,46 @@ class Job {
     };
   }
 
-};;
+  static async get(id) {
+    const jobRes = await db.query(
+      `SELECT id,
+                title,
+                salary,
+                equity,
+                company_handle AS "companyHandle"
+           FROM jobs
+           WHERE id = $1`,
+      [id]);
+
+    const job = jobRes.rows[0];
+
+    if (!job) throw new NotFoundError(`No job at id: ${id}`);
+
+    return job;
+  }
+  
+  static async update(id, data) {
+    const { setCols, values } = sqlForPartialUpdate(
+      data,
+      {
+        numEmployees: "num_employees",
+        logoUrl: "logo_url",
+      });
+    const handleVarIdx = "$" + (values.length + 1);
+
+    const querySql = `
+      UPDATE companies
+      SET ${setCols}
+        WHERE handle = ${handleVarIdx}
+        RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`;
+    const result = await db.query(querySql, [...values, handle]);
+    const company = result.rows[0];
+
+    if (!company) throw new NotFoundError(`No company: ${handle}`);
+
+    return company;
+  }
+};
 
 
 module.exports = Job;
